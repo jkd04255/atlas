@@ -34,3 +34,7 @@ Open `index.html` in a browser, or run `python3 -m http.server 8000` and visit `
 ## GitHub Pages
 
 The workflow `.github/workflows/pages.yml` deploys this static site on pushes to `main` when Pages is configured for **GitHub Actions**. In repository **Settings → Pages → Build and deployment → Source**, select **GitHub Actions**. Existing repositories and their code need no changes.
+
+## Deploy verification
+
+After selecting **GitHub Actions** under Settings → Pages, a new push to `main` triggers `.github/workflows/pages.yml`. Verify the latest run under **Actions → Deploy LEO Research Atlas**, confirm the `github-pages` environment reports **Success**, then open the URL shown under **Settings → Pages → Visit site**. Deployment success must be checked separately from source uploads.
