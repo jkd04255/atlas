@@ -1,0 +1,9 @@
+const test=require('node:test');const assert=require('node:assert/strict');const fs=require('node:fs');
+const {TOPICS,TOPIC_DATA,PAPERS,escapeHtml,cardHTML,paperHTML}=require('../app.js');
+const html=fs.readFileSync('index.html','utf8'),css=fs.readFileSync('styles.css','utf8'),workflow=fs.readFileSync('.github/workflows/pages.yml','utf8');
+test('all topic cards are research-only and distinct',()=>{assert.equal(TOPIC_DATA.length,4);assert.deepEqual(new Set(TOPIC_DATA.map(x=>x.id)),new Set(Object.keys(TOPICS)));});
+test('references distinguish lab-authored work and external literature',()=>{assert.equal(PAPERS.length,6);assert.ok(PAPERS.find(x=>x.id==='hwang2026').label.includes('연구실'));assert.ok(PAPERS.find(x=>x.id==='khan2020').points.some(x=>x.includes('Fig. 2')));});
+test('no user private project listing or private PDF downloads',()=>{const sources=html+fs.readFileSync('app.js','utf8');for(const forbidden of ['api.github.com/users/','project-atlas-site.zip','file:///','/mnt/data/'])assert.ok(!sources.includes(forbidden),forbidden);});
+test('XSS-safe descriptions',()=>{assert.equal(escapeHtml('<img x="1">'),'&lt;img x=&quot;1&quot;&gt;');assert.ok(!cardHTML(TOPIC_DATA[0]).includes('undefined'));assert.ok(paperHTML(PAPERS[0]).includes('data-paper'));});
+test('responsive, keyboard and reduced motion',()=>{for(const str of ['prefers-reduced-motion',':focus-visible','@media (max-width:680px)','bento'])assert.ok(css.includes(str));for(const str of ['lang="ko"','id="topic-grid"','id="paper-dialog"','id="topic-search"','class="skip-link"'])assert.ok(html.includes(str));});
+test('Pages workflow validates and deploys',()=>{for(const str of ['npm test','actions/configure-pages@v5','actions/deploy-pages@v4','id-token: write'])assert.ok(workflow.includes(str));});

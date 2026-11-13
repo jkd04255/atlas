@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#EDF3F4">
+  <meta name="description" content="LEO 위성통신의 Doppler, 확률기하, 차등 Doppler, GNSS-resilient 동기화 연구를 정리한 비공식 연구 노트.">
+  <meta property="og:title" content="LEO / NTN Research Atlas">
+  <meta property="og:description" content="저궤도 위성통신 연구의 개념부터 논문, 수식, MATLAB 재현까지.">
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./app.js"></script>
+  <title>LEO / NTN Research Atlas — 도플러 및 동기화 연구 노트</title>
+</head>
+<body>
+<a class="skip-link" href="#main">본문 바로가기</a>
+<div class="site-frame" id="top">
+  <header class="header">
+    <a class="brand" href="#top" aria-label="연구 아틀라스 홈"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span><span class="brand-name">LEO<span class="brand-slash">/</span>NTN <span class="brand-soft">ATLAS</span></span></a>
+    <nav aria-label="주요 메뉴" class="header-links"><a href="#research">연구 주제</a><a href="#reading">참고 문헌</a><a href="#reproduction">MATLAB 재현</a></nav>
+    <a class="header-action" href="https://github.com/jkd04255/atlas" target="_blank" rel="noreferrer noopener">소스 저장소 <span aria-hidden="true">↗</span></a>
+  </header>
+  <main id="main">
+    <section class="hero" aria-labelledby="main-title">
+      <div class="hero-copy">
+        <p class="mono meta"><span class="pulse"></span> RESEARCH NOTES · SATELLITE COMMUNICATIONS</p>
+        <h1 id="main-title">궤도에서 시작해<br><span class="title-muted">동기화까지.</span></h1>
+        <p class="hero-lede">LEO 위성의 이동이 만드는 Doppler 현상과 지상 단말의 동기화 문제. 관련 논문을 개념·수식·시뮬레이션의 흐름으로 연결한 연구 노트입니다.</p>
+        <div class="hero-ctas"><a class="action-main" href="#research">연구 지도 살펴보기 <span aria-hidden="true">↗</span></a><a class="action-text" href="#reproduction">현재 MATLAB 과제 <span aria-hidden="true">↓</span></a></div>
+        <div class="hero-caveat">정해준 교수님 연구실 관련 공개 학술자료를 바탕으로 만든 <strong>비공식 학습 아카이브</strong>입니다.</div>
+      </div>
+      <div class="hero-graphic" aria-label="LEO 위성과 지상 단말 사이의 시선 방향을 단순화해 표현한 개념도" role="img">
+        <span class="hero-figure-heading">SATELLITE / GROUND GEOMETRY</span>
+        <svg viewBox="0 0 610 450" aria-hidden="true" focusable="false">
+          <defs><linearGradient id="earth" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#244e64"/><stop offset="1" stop-color="#0c2436"/></linearGradient><linearGradient id="beam" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#71c9c2" stop-opacity=".22"/><stop offset="1" stop-color="#71c9c2" stop-opacity="0"/></linearGradient></defs>
+          <circle cx="285" cy="403" r="178" fill="url(#earth)" stroke="#5c8490" stroke-width="1.5" />
+          <path d="M108 405C146 298 390 250 461 370" fill="none" stroke="#94bcc3" stroke-width="1" stroke-dasharray="4 7" opacity=".5" />
+          <path d="M90 214C172 58 425 39 540 160" fill="none" stroke="#6ab9bb" stroke-width="1.5" stroke-dasharray="6 7" opacity=".8"/>
+          <path d="M395 100L285 245L482 274Z" fill="url(#beam)" opacity=".7"/>
+          <path d="M395 100L285 245" fill="none" stroke="#80e0ce" stroke-width="2.4"/><path d="M395 100L482 274" fill="none" stroke="#80e0ce" opacity=".48" stroke-width="1.5" stroke-dasharray="5 6"/>
+          <circle cx="285" cy="245" r="7.2" fill="#c7e7e5"/><circle cx="285" cy="245" r="19" fill="none" stroke="#a4d5d0" stroke-width="1" opacity=".7"/>
+          <g transform="translate(395 100) rotate(-26)"><rect x="-22" y="-10" width="44" height="20" rx="4" fill="#dcf0ea"/><rect x="-68" y="-16" width="37" height="32" rx="2" fill="#2b879b" stroke="#8bd2ce"/><rect x="31" y="-16" width="37" height="32" rx="2" fill="#2b879b" stroke="#8bd2ce"/><path d="M-68 -5h37m-37 10h37m49-10h37m-37 10h37M-50 -16v32M50 -16v32" stroke="#96cbd0" stroke-width=".8"/><path d="M0 10v15" stroke="#d9f0e9" stroke-width="2"/></g>
+          <path d="M305 244h68" stroke="#aacdd2" opacity=".7" stroke-dasharray="3 5"/><path d="M310 216Q320 234 309 245" fill="none" stroke="#e7c790" stroke-width="2"/>
+          <text x="335" y="221" fill="#e7c790" font-size="14" font-family="monospace">α(t)</text>
+          <text x="407" y="61" fill="#d8f0ed" font-size="13" font-family="monospace">LEO</text>
+          <text x="221" y="210" fill="#d6efea" font-size="12" font-family="monospace">UE</text>
+          <text x="320" y="153" fill="#9eddd5" font-size="13" font-family="monospace" transform="rotate(-48 320 153)">slant range s(t)</text>
+          <path d="M61 58H192" stroke="#628f9c"/><path d="M61 58v80" stroke="#628f9c"/><text x="70" y="86" font-size="11" fill="#8bb4bd" font-family="monospace">ωF · t</text>
+          <circle cx="61" cy="58" r="3" fill="#8fe7d8"/>
+        </svg>
+        <div class="hero-graphic-footer"><span>NOT TO SCALE</span><span>DOPPLER ∝ d s(t) / dt</span></div>
+      </div>
+    </section>
+
+    <section class="overview" aria-label="연구 내용 요약">
+      <div class="overview-label">RESEARCH MAP <span>연구 흐름</span></div>
+      <div class="overview-flow"><a href="#research" data-go-topic="geometry">위성 궤도·기하</a><span aria-hidden="true">⟶</span><a href="#research" data-go-topic="statistics">확률기하·Doppler 분포</a><span aria-hidden="true">⟶</span><a href="#research" data-go-topic="allocation">차등 Doppler 완화</a><span aria-hidden="true">⟶</span><a href="#research" data-go-topic="sync">폐루프 동기화</a></div>
+    </section>
+
+    <section id="research" class="research-section" aria-labelledby="research-title">
+      <div class="section-head"><div><p class="section-index">01 — Topics</p><h2 id="research-title">연구 주제 탐색</h2><p class="section-desc">논문에 등장하는 개념을 네 개의 연구 축으로 정리했습니다.</p></div><div class="section-counter">4 <span>RESEARCH AREAS</span></div></div>
+      <div class="topic-tools"><div class="chip-row" id="topic-filters" role="group" aria-label="연구 주제 필터"><button class="chip active" type="button" data-topic="all" aria-pressed="true">전체</button><button class="chip" type="button" data-topic="geometry" aria-pressed="false">위성 기하</button><button class="chip" type="button" data-topic="statistics" aria-pressed="false">확률기하</button><button class="chip" type="button" data-topic="allocation" aria-pressed="false">자원 배분</button><button class="chip" type="button" data-topic="sync" aria-pressed="false">동기화</button></div><label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"></circle><path d="m15 15 5 5"></path></svg><input type="search" id="topic-search" placeholder="주제·키워드 검색" aria-label="연구 주제 검색"></label></div>
+      <div class="bento" id="topic-grid" aria-live="polite"></div><p id="empty-topics" class="empty" hidden>일치하는 연구 주제가 없습니다. 다른 단어를 검색해 보세요.</p>
+    </section>
+
+    <section id="reading" class="reading-section" aria-labelledby="reading-title">
+      <div class="section-head"><div><p class="section-index">02 — Literature</p><h2 id="reading-title">논문과 자료의 관계</h2><p class="section-desc">외부 선행연구와 연구실 저자 논문을 구분해 소개합니다.</p></div><span class="minor-note">원문 파일은 공개 배포하지 않습니다</span></div>
+      <div class="reading-columns"><div class="reading-primary"><h3>핵심 참고 문헌</h3><div id="paper-list" class="paper-list"></div></div><aside class="reading-note"><span class="note-symbol" aria-hidden="true">∑</span><h3>수식에서 시뮬레이션으로</h3><p>거리 <span class="math">s(t)</span>의 변화율을 Doppler 주파수로 연결하고, 사용자 위치의 불확실성을 CDF로 표현한 뒤, 자원배분과 동기화 알고리즘으로 확장합니다.</p><div class="formula-panel"><span>기본 Doppler 관계</span><strong>Δf / f<sub>c</sub> ≈ −ṡ(t) / c</strong><small>부호는 논문에서 채택한 시선속도 정의에 따릅니다.</small></div><p class="note-end">각 논문 카드에서 관련 식과 페이지, 검토할 개념을 확인할 수 있습니다.</p></aside></div>
+    </section>
+
+    <section id="reproduction" class="repro-section" aria-labelledby="repro-title">
+      <div class="repro-intro"><p class="section-index">03 — MATLAB notebook</p><h2 id="repro-title">현재 재현 목표</h2><p>주어진 결과를 단순히 그리는 것이 아니라, 확률변수와 기하 모델을 이해하고 MATLAB 코드를 직접 작성하는 학습 순서입니다.</p><div class="task-paper">대상: Khan &amp; Afshang (2020) · 논문 5쪽 · Fig. 2</div><h3>CDF of Doppler shift magnitude</h3><div class="repro-steps" id="repro-steps"><label><input type="checkbox" data-step="0"><span><b>1. 시스템 모델 이해</b><small>UE 클러스터 반경 ρ, 위성 고도 h, 거리의 정의</small></span></label><label><input type="checkbox" data-step="1"><span><b>2. 확률분포 수식 확인</b><small>거리 CDF F<sub>M</sub> 와 Doppler CDF 식 (15)</small></span></label><label><input type="checkbox" data-step="2"><span><b>3. 매개변수·단위 정리</b><small>논문의 그래프 설정값, rad/s 및 Hz 단위 검증</small></span></label><label><input type="checkbox" data-step="3"><span><b>4. MATLAB 구현 및 검증</b><small>이론 CDF와 Monte Carlo 결과를 비교</small></span></label></div><small class="progress-note">체크 상태는 현재 브라우저에서만 유지됩니다. 재현 완료를 의미하지 않습니다.</small></div><div class="repro-graphic"><div class="plot-title"><span>EXPECTED SHAPE · CONCEPT SKETCH</span><span>CDF</span></div><svg viewBox="0 0 510 320" role="img" aria-label="Doppler 절댓값의 누적분포함수가 0에서 1로 증가하는 개념적 곡선. 논문의 실제 결과를 복제한 그래프는 아님"><path d="M66 29V270H475" stroke="#98b7b9" stroke-width="1.5" fill="none"/><g stroke="#62858a" stroke-dasharray="4 7" opacity=".32"><path d="M66 80H475M66 130H475M66 180H475M66 230H475"/><path d="M148 29V270M230 29V270M312 29V270M394 29V270"/></g><text x="39" y="38" fill="#c1d9da" font-size="12">1</text><text x="39" y="274" fill="#c1d9da" font-size="12">0</text><text x="450" y="297" fill="#c1d9da" font-size="12">|χ|</text><path d="M66 270C100 267 127 247 155 206S209 111 243 77S308 37 475 30" stroke="#7fe0c8" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M66 270C110 269 176 255 206 219S287 84 322 57S390 32 475 30" stroke="#f2bd74" stroke-width="3.5" fill="none" stroke-linecap="round"/><circle cx="243" cy="77" r="5" fill="#e0fff5"/><text x="82" y="57" fill="#b8d4d5" font-size="11" font-family="monospace">F|χ|(x) = P(|χ| ≤ x)</text></svg><div class="plot-legend"><span><i class="legend-a"></i> 설정 A (예시)</span><span><i class="legend-b"></i> 설정 B (예시)</span></div><p>위 곡선은 CDF의 형태만 표현한 개념도입니다. 논문의 Fig. 2를 수치적으로 재현하거나 검증한 결과가 아닙니다.</p></div>
+    </section>
+  </main>
+  <footer class="footer"><div><a class="footer-brand" href="#top">LEO / NTN ATLAS</a><p>연구 내용의 이해와 재현을 위한 비공식 학습 아카이브</p></div><div class="footer-right"><a href="https://github.com/jkd04255/atlas" target="_blank" rel="noreferrer noopener">GitHub ↗</a><span>문헌의 저작권은 각 저자·출판사에 있습니다.</span></div></footer>
+</div>
+<dialog id="paper-dialog" aria-labelledby="dialog-title"><div class="dialog-wrap"><button class="dialog-close" type="button" aria-label="논문 상세 닫기">×</button><p class="section-index" id="dialog-tag"></p><h2 id="dialog-title"></h2><p id="dialog-authors"></p><p id="dialog-description"></p><h3>읽어볼 부분</h3><ul id="dialog-points"></ul><div class="dialog-actions"><a id="dialog-link" target="_blank" rel="noopener noreferrer">논문 검색 ↗</a></div></div></dialog>
+</body>
+</html>
